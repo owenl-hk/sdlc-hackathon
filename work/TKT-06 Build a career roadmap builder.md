@@ -1,5 +1,5 @@
 ---
-status: backlog
+status: in-progress
 ---
 ## Description
 
@@ -41,6 +41,21 @@ Its output is a JSON object with `summary` (current and target profile, duration
 - **Company tier:** early-stage startup, high-growth scale-up, big tech, traditional enterprise, remote-first agency.
 - **Five questions:** location (country and city), work mode, weekly time commitment, upskilling budget, and learning style.
 
+## Decisions
+
+Signed off by the person in the first session.
+
+- **LLM provider:** provider-agnostic through Pydantic AI's `provider:model` strings. The user picks from a short fixed list (Anthropic, OpenAI, Google Gemini), enters a model name and pastes their own key. *Why:* the person wants users to bring any AI key, and Gemini's free tier suits testing.
+- **Key handling:** the key travels in a request header for one call, is never written to disk or logs, and the frontend holds it in component state only, with no `localStorage` or cookies. It never passes through the chat.
+- **Job search:** Adzuna, free tier, with the operator's key in the git-ignored `.env`. *Why:* free tier, documented country and city filter, no scraping.
+- **Web search:** Tavily, free tier, with the operator's key in `.env`. *Why:* Pydantic AI ships a Tavily tool.
+- **Orchestration:** Pydantic AI with `asyncio.gather` for the parallel scouts. No LangGraph for now. *Why:* the pipeline is a fixed chain with one parallel step.
+- **Folders:** `backend/` and `frontend/`.
+- **Tooling:** backend `pytest` + `pytest-asyncio`, `ruff`, `uv`; frontend `vitest` + Testing Library, `eslint` + `prettier`.
+- **Gap scoring:** `adjusted = raw ÷ hours factor`. Factors: under 5 h = 0.5, 5 up to 10 h = 1.0, 10 up to 20 h = 1.5, 20 h or more = 2.0, with boundary values in the higher band. Raw is 2 per missing skill or tool, 5 per missing paradigm, and 4 to 10 for the level jump. Precedence is top-down: 15 or more is 2 years, else 7 or more is 1 year, else 6 months. Computed in plain code.
+- **CV validity:** under 100 whitespace-separated words after extraction is rejected before any agent runs. Zero matches against a bundled tech-term lexicon warns but doesn't block.
+- **Commit plan:** the 14 rows as written. If commit 12 (upload plus key entry) grows, split it through a plan change.
+
 ## Commit plan
 
 | # | Commit message | What it covers | Status |
@@ -76,11 +91,11 @@ Its output is a JSON object with `summary` (current and target profile, duration
 
 ## Acceptance criteria
 
-- [ ] The person signed off the LLM provider and how users supply their key
-- [ ] The person signed off the job-search and web-search APIs
-- [ ] The person signed off the orchestration library, the folder names and the tooling
-- [ ] The person signed off the gap scoring thresholds
-- [ ] The person signed off the commit plan
+- [x] The person signed off the LLM provider and how users supply their key
+- [x] The person signed off the job-search and web-search APIs
+- [x] The person signed off the orchestration library, the folder names and the tooling
+- [x] The person signed off the gap scoring thresholds
+- [x] The person signed off the commit plan
 - [ ] A user can upload a PDF or DOCX CV, set preferences, and get a phased roadmap
 - [ ] A CV with too little text gets a clear warning and no agent runs
 - [ ] The roadmap duration follows the signed-off scoring rules, not an LLM's opinion
